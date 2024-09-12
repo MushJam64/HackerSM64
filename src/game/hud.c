@@ -29,12 +29,14 @@
  **/
 
 #ifdef BREATH_METER
-#define HUD_BREATH_METER_X         40
-#define HUD_BREATH_METER_Y         32
-#define HUD_BREATH_METER_HIDDEN_Y -20
+#define HUD_BREATH_METER_X         275
+#define HUD_BREATH_METER_Y         145
+#define HUD_BREATH_METER_X_HIDDEN  550
 #endif
 
 f32 hud_alpha = 255.0f;
+f32 hud_no_alpha = 0.0f;
+f32 hud_alpha_multi = 5.0f;
 
 // ------------- FPS COUNTER ---------------
 // To use it, call print_fps(x,y); every frame.
@@ -84,6 +86,7 @@ struct PowerMeterHUD {
     s8 animation;
     s16 x;
     s16 y;
+    s16 alpha;
 };
 
 struct CameraHUD {
@@ -110,7 +113,7 @@ static s16 sBreathMeterStoredValue;
 static struct PowerMeterHUD sBreathMeterHUD = {
     BREATH_METER_HIDDEN,
     HUD_BREATH_METER_X,
-    HUD_BREATH_METER_HIDDEN_Y,
+    HUD_BREATH_METER_X_HIDDEN,
 };
 s32 sBreathMeterVisibleTimer = 0;
 #endif
@@ -330,7 +333,7 @@ void render_breath_meter_segment(s16 numBreathWedges) {
  * Renders breath meter display lists.
  * That includes the base and the colored segment textures.
  */
-void render_dl_breath_meter(s16 numBreathWedges) {
+void render_dl_breath_meter(s16 numBreathWedges, u8 a) {
     Mtx *mtx = alloc_display_list(sizeof(Mtx));
 
     if (mtx == NULL) {
@@ -346,7 +349,10 @@ void render_dl_breath_meter(s16 numBreathWedges) {
         render_breath_meter_segment(numBreathWedges);
         gSPDisplayList(gDisplayListHead++, &dl_breath_meter_health_segments_end);
     }
+    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 200);
+    gSPDisplayList(gDisplayListHead++, &meter_bg_meter_bg_mesh);
     gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
+     
 }
 
 /**
@@ -354,8 +360,8 @@ void render_dl_breath_meter(s16 numBreathWedges) {
  * Moves breath meter y pos speed until it's visible.
  */
 static void animate_breath_meter_sliding_in(void) {
-    approach_s16_symmetric_bool(&sBreathMeterHUD.y, HUD_BREATH_METER_Y, 5);
-    if (sBreathMeterHUD.y         == HUD_BREATH_METER_Y) {
+    approach_s16_symmetric_bool(&sBreathMeterHUD.x, HUD_BREATH_METER_X, 5);
+    if (sBreathMeterHUD.x         == HUD_BREATH_METER_X) {
         sBreathMeterHUD.animation = BREATH_METER_VISIBLE;
     }
 }
@@ -365,8 +371,8 @@ static void animate_breath_meter_sliding_in(void) {
  * Moves breath meter y pos quickly until it's hidden.
  */
 static void animate_breath_meter_sliding_out(void) {
-    approach_s16_symmetric_bool(&sBreathMeterHUD.y, HUD_BREATH_METER_HIDDEN_Y, 20);
-    if (sBreathMeterHUD.y         == HUD_BREATH_METER_HIDDEN_Y) {
+    approach_s16_symmetric_bool(&sBreathMeterHUD.x, HUD_BREATH_METER_X_HIDDEN, 20);
+    if (sBreathMeterHUD.x        == HUD_BREATH_METER_X_HIDDEN) {
         sBreathMeterHUD.animation = BREATH_METER_HIDDEN;
     }
 }
@@ -395,7 +401,7 @@ void handle_breath_meter_actions(s16 numBreathWedges) {
     }
 }
 
-void render_hud_breath_meter(void) {
+void render_hud_breath_meter(u8 a) {
     s16 shownBreathAmount = gHudDisplay.breath;
     if (sBreathMeterHUD.animation != BREATH_METER_HIDING) handle_breath_meter_actions(shownBreathAmount);
     if (sBreathMeterHUD.animation == BREATH_METER_HIDDEN) return;
@@ -404,48 +410,15 @@ void render_hud_breath_meter(void) {
         case BREATH_METER_HIDING:        animate_breath_meter_sliding_out(); break;
         default:                                                             break;
     }
-    render_dl_breath_meter(shownBreathAmount);
+    render_dl_breath_meter(shownBreathAmount, a);
     sBreathMeterVisibleTimer++;
+
 }
 #endif
 
+void render_meter(f32 x, f32 y) {
 
-void int_to_str_000(s32 num, u8 *dst) {
-    s32 digit[3];
-
-    s8 pos = 0;
-
-    if (num > 999) {
-        dst[0] = 0x00;
-        dst[1] = DIALOG_CHAR_TERMINATOR;
-        return;
-    }
-
-    digit[0] = (num / 100);
-    digit[1] = ((num - (digit[0] * 100)) / 10);
-    digit[2] = ((num - (digit[0] * 100)) - (digit[1] * 10));
-
-    if (num < 10) {
-        dst[0] = 0;
-        dst[1] = 0;
-        dst[2] = digit[2];
-    } else if (num < 100) {
-        dst[0] = 0;
-        dst[1] = digit[1];
-        dst[2] = digit[2];
-    } else {
-        dst[0] = digit[0];
-        dst[1] = digit[1];
-        dst[2] = digit[2];
-    }
-    return;
-}
-
-
-
-void render_meter(f32 x, f32 y, u8 a) {
-
-    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, a);
+    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 200);
     create_dl_translation_matrix(MENU_MTX_PUSH, x, y, 0);
 
     gSPDisplayList(gDisplayListHead++, &meter_bg_meter_bg_mesh);
@@ -628,8 +601,7 @@ void render_hud(void) {
             render_hud_cannon_reticle();
         }
 
-        s16 meterhp = gHudDisplay.wedges;
-        render_meter(275, 198, (u8)hud_alpha);
+        render_meter(275, 198);
 
 
 #ifdef ENABLE_LIVES
@@ -652,10 +624,8 @@ void render_hud(void) {
 
 #ifdef BREATH_METER
         if (hudDisplayFlags & HUD_DISPLAY_FLAG_BREATH_METER) {
-            render_hud_breath_meter();
-            if (sBreathMeterHUD.y > 0) {
-                render_meter(175, 145, (u8)hud_alpha * (sBreathMeterHUD.y / 255.0f));
-            }
+            render_hud_breath_meter((u8)approach_f32_asymptotic(hud_no_alpha, hud_alpha, 2));
+            
         }
 #endif
 
