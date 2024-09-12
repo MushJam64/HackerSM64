@@ -284,7 +284,8 @@ enum OrangeNumbers { // oBehParams2ndByte, oAnimState
     ORANGE_NUMBER_C,
     ORANGE_NUMBER_D,
     ORANGE_NUMBER_E,
-    ORANGE_NUMBER_F
+    ORANGE_NUMBER_F,
+    ORANGE_NUMBER_EXCLAMATION
 };
 
 /* Coin Type */
@@ -1386,6 +1387,10 @@ enum animIDsToad {
     TOAD_ANIM_EAST_STANDING,
     TOAD_ANIM_WEST_WAVING_BOTH_ARMS,
     TOAD_ANIM_EAST_WAVING_ONE_ARM,
+};
+
+enum animIDsMarioNPC {
+    MARIO_ANIM_IDLE, // 1 frame
 };
 
 /* Intro Peach */

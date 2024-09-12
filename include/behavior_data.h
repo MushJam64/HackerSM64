@@ -323,6 +323,7 @@ extern const BehaviorScript bhvSeaweedBundle[];
 extern const BehaviorScript bhvBobomb[];
 extern const BehaviorScript bhvBobombFuseSmoke[];
 extern const BehaviorScript bhvBobombBuddy[];
+extern const BehaviorScript bhvMarioNPC[];
 extern const BehaviorScript bhvBobombBuddyOpensCannon[];
 extern const BehaviorScript bhvCannonClosed[];
 extern const BehaviorScript bhvWhirlpool[];

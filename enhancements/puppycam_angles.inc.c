@@ -10,20 +10,6 @@
 struct newcam_hardpos newcam_fixedcam[] =
 {
 
-#ifdef PUPPYCAM_SAMPLES
-// Example Scripts
-{/*Level ID*/ 16,/*Area ID*/ 1,/*Permaswap*/ 0,/*Mode*/ NC_MODE_FIXED_NOMOVE,/*Script*/ 0, //Standard params.
-/*X begin*/ -540,/*Y begin*/ 800,/*Z begin*/ -3500, //Where the activation box begins
-/*X end*/ 540,/*Y end*/ 2000,/*Z end*/ -1500, //Where the activation box ends.
-/*Cam X*/ 0,/*Cam Y*/ 1500,/*Cam Z*/ -1000, //The position the camera gets placed for NC_MODE_FIXED and NC_MODE_FIXED_NOMOVE
-/*Look X*/ 0,/*Look Y*/ 800,/*Look Z*/ -2500}, //The position the camera looks at for NC_MODE_FIXED_NOMOVE
-
-///Another example angle. This activates a script that slowly rotates the camera around the area.
-{/*Level ID*/ 16,/*Area ID*/ 1,/*Permaswap*/ 0,/*Mode*/ NC_MODE_NOROTATE,/*Script*/ 0, //Standard params.
-/*X begin*/ 5716,/*Y begin*/ 400,/*Z begin*/ -859, //Where the activation box begins
-/*X end*/ 6908,/*Y end*/ 1000,/*Z end*/ 62, //Where the activation box ends.
-/*Cam X*/ 32767,/*Cam Y*/ 32767,/*Cam Z*/ 32767, //The position the camera gets placed for NC_MODE_FIXED and NC_MODE_FIXED_NOMOVE
-/*Look X*/ 32767,/*Look Y*/ 32767,/*Look Z*/ 32767}, //The position the camera looks at for NC_MODE_FIXED_NOMOVE
-#endif
+	{LEVEL_WMOTR, 1, 1, NC_MODE_FIXED_NOMOVE, 0, -939, -1544, -939, 939, 456, 939, -22, 245, 823, -22, 233, 723},
 
 };

@@ -116,9 +116,24 @@ struct HudDisplay {
     /*0x08*/ s16 keys;
     /*0x0A*/ s16 flags;
     /*0x0C*/ u16 timer;
-#ifdef BREATH_METER
              u16 breath;
-#endif
+             s8 abilityMeter;
+             s16 abilityMeterStyle;
+};
+
+enum MeterStyles {
+    METER_STYLE_GENERIC,
+    METER_STYLE_HP,
+    METER_STYLE_BREATH,
+    METER_STYLE_AKU,
+    METER_STYLE_PHASEWALK,
+    METER_STYLE_PHASEWALK_SUPERJUMP,
+    METER_STYLE_PHASEWALK_RECHARGE,
+    METER_STYLE_ROCKET,
+    METER_STYLE_CHRONOS,
+    METER_STYLE_DASH_BOOSTER,
+    METER_STYLE_AKU_RECHARGE,
+    METER_STYLE_COUNT
 };
 
 extern struct HudDisplay gHudDisplay;

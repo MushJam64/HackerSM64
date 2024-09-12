@@ -1752,7 +1752,9 @@ u32 check_npc_talk(struct MarioState *m, struct Object *obj) {
         struct Object *orangeNumber;
         if (obj->behavior == segmented_to_virtual(bhvYoshi)) {
             orangeNumber = spawn_object_relative(ORANGE_NUMBER_A, 0, 256, 64, obj, MODEL_NUMBER, bhvOrangeNumber);
-        } else {
+        } else if (obj->behavior == segmented_to_virtual(bhvMarioNPC)) {
+            orangeNumber = spawn_object_relative(ORANGE_NUMBER_EXCLAMATION, 0, 200, 0, obj, MODEL_NUMBER, bhvOrangeNumber);
+        }    else {
             orangeNumber = spawn_object_relative(ORANGE_NUMBER_A, 0, 160,  0, obj, MODEL_NUMBER, bhvOrangeNumber);
         }
         orangeNumber->oHomeX = orangeNumber->oPosX;

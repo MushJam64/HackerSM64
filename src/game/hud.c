@@ -19,6 +19,8 @@
 #include "puppyprint.h"
 
 #include "config.h"
+#include "actors/group0.h"
+
 
 /* @file hud.c
  * This file implements HUD rendering and power meter animations.
@@ -31,6 +33,8 @@
 #define HUD_BREATH_METER_Y         32
 #define HUD_BREATH_METER_HIDDEN_Y -20
 #endif
+
+f32 hud_alpha = 255.0f;
 
 // ------------- FPS COUNTER ---------------
 // To use it, call print_fps(x,y); every frame.
@@ -91,9 +95,9 @@ struct CameraHUD {
 static s16 sPowerMeterStoredHealth;
 
 static struct PowerMeterHUD sPowerMeterHUD = {
-    POWER_METER_HIDDEN,
+    POWER_METER_EMPHASIZED,
     HUD_POWER_METER_X,
-    HUD_POWER_METER_HIDDEN_Y,
+    HUD_POWER_METER_Y,
 };
 
 // Power Meter timer that keeps counting when it's visible.
@@ -110,6 +114,13 @@ static struct PowerMeterHUD sBreathMeterHUD = {
 };
 s32 sBreathMeterVisibleTimer = 0;
 #endif
+
+static s16 sBGMeterStoredValue;
+static struct PowerMeterHUD sBGMeterHUD = {
+    BG_METER_HIDDEN,
+    0, // Alpha
+};
+s32 sBGMeterVisibleTimer = 0;
 
 static struct CameraHUD sCameraHUD = { CAM_STATUS_NONE };
 
@@ -201,13 +212,6 @@ void render_dl_power_meter(s16 numHealthWedges) {
 void animate_power_meter_emphasized(void) {
     s16 hudDisplayFlags = gHudDisplay.flags;
 
-    if (!(hudDisplayFlags & HUD_DISPLAY_FLAG_EMPHASIZE_POWER)) {
-        if (sPowerMeterVisibleTimer == 45.0f) {
-            sPowerMeterHUD.animation = POWER_METER_DEEMPHASIZING;
-        }
-    } else {
-        sPowerMeterVisibleTimer = 0;
-    }
 }
 
 /**
@@ -225,7 +229,7 @@ static void animate_power_meter_deemphasizing(void) {
 
     if (sPowerMeterHUD.y > HUD_POWER_METER_Y) {
         sPowerMeterHUD.y = HUD_POWER_METER_Y;
-        sPowerMeterHUD.animation = POWER_METER_VISIBLE;
+        sPowerMeterHUD.animation = POWER_METER_EMPHASIZED;
     }
 }
 
@@ -257,22 +261,12 @@ void handle_power_meter_actions(s16 numHealthWedges) {
         sPowerMeterVisibleTimer = 0;
     }
 
-    // After health is full, hide power meter
-    if (numHealthWedges == 8 && sPowerMeterVisibleTimer > 45.0f) {
-        sPowerMeterHUD.animation = POWER_METER_HIDING;
-    }
-
     // Update to match health value
     sPowerMeterStoredHealth = numHealthWedges;
 
 #ifndef BREATH_METER
     // If Mario is swimming, keep power meter visible
     if (gPlayerCameraState->action & ACT_FLAG_SWIMMING) {
-        if (sPowerMeterHUD.animation == POWER_METER_HIDDEN
-            || sPowerMeterHUD.animation == POWER_METER_EMPHASIZED) {
-            sPowerMeterHUD.animation = POWER_METER_DEEMPHASIZING;
-            sPowerMeterHUD.y = HUD_POWER_METER_EMPHASIZED_Y;
-        }
         sPowerMeterVisibleTimer = 0;
     }
 #endif
@@ -283,18 +277,34 @@ void handle_power_meter_actions(s16 numHealthWedges) {
  * or has taken damage and has less than 8 health segments.
  * And calls a power meter animation function depending of the value defined.
  */
+f32 prevHurt = 0;
+f32 hurt = 0;
+f32 hurtTimer = 0;
+
+f32 map_value(f32 srcMin, f32 srcMax, f32 dstMin, f32 dstMax, f32 x) {
+    return (x - srcMin) / (srcMax - srcMin) * (dstMax - dstMin) + dstMin;
+}
+
 void render_hud_power_meter(void) {
     s16 shownHealthWedges = gHudDisplay.wedges;
-    if (sPowerMeterHUD.animation != POWER_METER_HIDING) handle_power_meter_actions(shownHealthWedges);
-    if (sPowerMeterHUD.animation == POWER_METER_HIDDEN) return;
-    switch (sPowerMeterHUD.animation) {
-        case POWER_METER_EMPHASIZED:    animate_power_meter_emphasized();    break;
-        case POWER_METER_DEEMPHASIZING: animate_power_meter_deemphasizing(); break;
-        case POWER_METER_HIDING:        animate_power_meter_hiding();        break;
-        default:                                                             break;
+    f32 powerMeterX, powerMeterY;
+    f32 srcX, srcY, dstX, dstY;
+    f32 interpolation, shakiness, range;
+    prevHurt = hurt;
+    hurt = gMarioStates[0].hurtCounter;
+    
+        powerMeterX = HUD_POWER_METER_X;
+        powerMeterY = HUD_POWER_METER_Y;
+    
+    shakiness = gMarioStates[0].hurtCounter;
+    range = (s32)(shakiness * 2);
+    if (range > 0) {
+        powerMeterX = powerMeterX + (random_float() * (range + range) - range);
+        powerMeterY = powerMeterY + (random_float() * (range + range) - range);
     }
+    sPowerMeterHUD.x = powerMeterX;
+    sPowerMeterHUD.y = powerMeterY;
     render_dl_power_meter(shownHealthWedges);
-    sPowerMeterVisibleTimer++;
 }
 
 #ifdef BREATH_METER
@@ -400,6 +410,49 @@ void render_hud_breath_meter(void) {
 #endif
 
 
+void int_to_str_000(s32 num, u8 *dst) {
+    s32 digit[3];
+
+    s8 pos = 0;
+
+    if (num > 999) {
+        dst[0] = 0x00;
+        dst[1] = DIALOG_CHAR_TERMINATOR;
+        return;
+    }
+
+    digit[0] = (num / 100);
+    digit[1] = ((num - (digit[0] * 100)) / 10);
+    digit[2] = ((num - (digit[0] * 100)) - (digit[1] * 10));
+
+    if (num < 10) {
+        dst[0] = 0;
+        dst[1] = 0;
+        dst[2] = digit[2];
+    } else if (num < 100) {
+        dst[0] = 0;
+        dst[1] = digit[1];
+        dst[2] = digit[2];
+    } else {
+        dst[0] = digit[0];
+        dst[1] = digit[1];
+        dst[2] = digit[2];
+    }
+    return;
+}
+
+
+
+void render_meter(f32 x, f32 y, u8 a) {
+
+    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, a);
+    create_dl_translation_matrix(MENU_MTX_PUSH, x, y, 0);
+
+    gSPDisplayList(gDisplayListHead++, &meter_bg_meter_bg_mesh);
+
+    gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
+}
+
 /**
  * Renders the amount of lives Mario has.
  */
@@ -425,9 +478,15 @@ void render_debug_mode(void) {
  * Renders the amount of coins collected.
  */
 void render_hud_coins(void) {
-    print_text(HUD_COINS_X, HUD_TOP_Y, "$"); // 'Coin' glyph
-    print_text((HUD_COINS_X + 16), HUD_TOP_Y, "*"); // 'X' glyph
-    print_text_fmt_int((HUD_COINS_X + 30), HUD_TOP_Y, "%d", gHudDisplay.coins);
+    if (gHudDisplay.coins < 10){
+        print_text(HUD_COINS_X, HUD_BOTTOM_Y, "$"); // 'Coin' glyph
+        print_text((HUD_COINS_X + 16), HUD_BOTTOM_Y, "*"); // 'X' glyph
+        print_text_fmt_int((HUD_COINS_X + 30), HUD_BOTTOM_Y, "%d", gHudDisplay.coins);
+    } else {
+        print_text(HUD_COINS_X - 2, HUD_BOTTOM_Y, "$"); // 'Coin' glyph
+        print_text((HUD_COINS_X + 14), HUD_BOTTOM_Y, "*"); // 'X' glyph
+        print_text_fmt_int((HUD_COINS_X + 28), HUD_BOTTOM_Y, "%d", gHudDisplay.coins); 
+    }
 }
 
 /**
@@ -541,9 +600,7 @@ void render_hud(void) {
     s16 hudDisplayFlags = gHudDisplay.flags;
 
     if (hudDisplayFlags == HUD_DISPLAY_NONE) {
-        sPowerMeterHUD.animation = POWER_METER_HIDDEN;
         sPowerMeterStoredHealth = 8;
-        sPowerMeterVisibleTimer = 0;
 #ifdef BREATH_METER
         sBreathMeterHUD.animation = BREATH_METER_HIDDEN;
         sBreathMeterStoredValue = 8;
@@ -571,6 +628,10 @@ void render_hud(void) {
             render_hud_cannon_reticle();
         }
 
+        s16 meterhp = gHudDisplay.wedges;
+        render_meter(275, 198, (u8)hud_alpha);
+
+
 #ifdef ENABLE_LIVES
         if (hudDisplayFlags & HUD_DISPLAY_FLAG_LIVES) {
             render_hud_mario_lives();
@@ -590,7 +651,12 @@ void render_hud(void) {
         }
 
 #ifdef BREATH_METER
-        if (hudDisplayFlags & HUD_DISPLAY_FLAG_BREATH_METER) render_hud_breath_meter();
+        if (hudDisplayFlags & HUD_DISPLAY_FLAG_BREATH_METER) {
+            render_hud_breath_meter();
+            if (sBreathMeterHUD.y > 0) {
+                render_meter(175, 145, (u8)hud_alpha * (sBreathMeterHUD.y / 255.0f));
+            }
+        }
 #endif
 
         if (hudDisplayFlags & HUD_DISPLAY_FLAG_CAMERA_AND_POWER) {

@@ -41,6 +41,7 @@
 /**
  * Checks if Mario's animation has reached its end point.
  */
+
 s32 is_anim_at_end(struct MarioState *m) {
     struct Object *marioObj = m->marioObj;
 
@@ -1326,6 +1327,7 @@ void update_mario_geometry_inputs(struct MarioState *m) {
  * Handles Mario's input flags as well as a couple timers.
  */
 void update_mario_inputs(struct MarioState *m) {
+    if (gCurrLevelNum != LEVEL_WMOTR){
     m->particleFlags = PARTICLE_NONE;
     m->input = INPUT_NONE;
     m->collidedObjInteractTypes = m->marioObj->collidedObjInteractTypes;
@@ -1372,6 +1374,7 @@ void update_mario_inputs(struct MarioState *m) {
 
     if (m->doubleJumpTimer > 0) {
         m->doubleJumpTimer--;
+        }
     }
 }
 

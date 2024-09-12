@@ -1,0 +1,14 @@
+extern const GeoLayout Title_geo[];
+extern Vtx Title_Title_mesh_layer_1_vtx_0[1092];
+extern Gfx Title_Title_mesh_layer_1_tri_0[];
+extern Vtx Title_Title_mesh_layer_1_vtx_1[1300];
+extern Gfx Title_Title_mesh_layer_1_tri_1[];
+extern Vtx Title_Title_mesh_layer_1_vtx_2[212];
+extern Gfx Title_Title_mesh_layer_1_tri_2[];
+extern Gfx mat_Title_f3dlite_material_001[];
+extern Gfx mat_revert_Title_f3dlite_material_001[];
+extern Gfx mat_Title_f3dlite_material_002[];
+extern Gfx mat_revert_Title_f3dlite_material_002[];
+extern Gfx mat_Title_f3dlite_material[];
+extern Gfx mat_revert_Title_f3dlite_material[];
+extern Gfx Title_Title_mesh_layer_1[];

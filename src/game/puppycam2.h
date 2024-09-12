@@ -23,6 +23,9 @@
 #define PUPPYCAM_MODE3_ZOOMED_IN            (1 << 0) // 0x1
 #define PUPPYCAM_MODE3_ZOOMED_MED           (1 << 1) // 0x2
 #define PUPPYCAM_MODE3_ZOOMED_OUT           (1 << 2) // 0x4
+#define PUPPYCAM_MODE3_ZOOMED_INTWO         (1 << 0) // 0x1
+#define PUPPYCAM_MODE3_ZOOMED_MEDTWO        (1 << 1) // 0x2 
+#define PUPPYCAM_MODE3_ZOOMED_OUTTWO        (1 << 2) // 0x4
 #define PUPPYCAM_MODE3_ENTER_FIRST_PERSON   (1 << 3) // 0x8
 
 #define PUPPYSPLINE_NONE                    (1 << 0) // 0x1 // Will not write to focus at all.
@@ -62,7 +65,7 @@ struct gPuppyStruct
     f32 pitchAcceleration;      // Vertical Direction that sets pitchTarget.
     s16 zoom;                   // How far the camera is currently zoomed out
     s16 zoomTarget;             // The value that zoom tries to be.
-    s16 zoomPoints[3];          // An array containing distances.
+    s16 zoomPoints[5];          // An array containing distances.
     s16 targetFloorHeight;      // Mario's current floor height
     s16 lastTargetFloorHeight;  // Mirror's mario's floor height when his velocity is not above 0.
     Vec3f pos;                  // Where the camera is
@@ -250,6 +253,6 @@ struct newcam_hardpos {
     s16 newcam_hard_lookY;
     s16 newcam_hard_lookZ;
 };
-extern struct newcam_hardpos newcam_fixedcam[];
+extern struct newcam_hardpos newcam_fixedcam[1];
 
 #endif // PUPPYCAM2_H

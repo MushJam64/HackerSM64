@@ -331,4 +331,14 @@ extern const Gfx white_particle_small_dl_end[];
 extern const Gfx white_particle_small_dl[];
 extern const Gfx white_particle_small_unused_dl[];
 
+#include "mario/geo_header.h"
+
+#include "meter_bg/header.h"
+
+#include "mario_npc/geo_header.h"
+
+
+#include "mario_npc/anim_header.h"
+#include "Title/geo_header.h"
+
 #endif

@@ -10,7 +10,7 @@
  * SET YOUR FONT NAME HERE
  */
 #ifndef FONTNAME
-    #define FONTNAME impact
+    #define FONTNAME newsm64
 #endif
 
 

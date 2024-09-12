@@ -539,6 +539,7 @@
 #define MODEL_METAL_BOX_DL                0xDA        // metal_box_dl
 #define MODEL_NUMBER                      0xDB        // number_geo
 #define MODEL_FLYGUY                      0xDC        // shyguy_geo
+#define MODEL_MARIO_NPC                   0xDD        // mario_npc_geo
 #define MODEL_TOAD                        0xDD        // toad_geo
 #define MODEL_PEACH                       0xDE        // peach_geo
 #define MODEL_CHUCKYA                     0xDF        // chuckya_geo
