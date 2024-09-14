@@ -253,6 +253,6 @@ struct newcam_hardpos {
     s16 newcam_hard_lookY;
     s16 newcam_hard_lookZ;
 };
-extern struct newcam_hardpos newcam_fixedcam[1];
+extern struct newcam_hardpos newcam_fixedcam[];
 
 #endif // PUPPYCAM2_H
